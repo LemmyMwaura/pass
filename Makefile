@@ -1,5 +1,8 @@
 build:
 	@go build -o .bin/cmd
 
-start-bin:
+start-app:
+	@go build -o .bin/cmd && .bin/cmd start
+
+run:
 	@.bin/cmd start
