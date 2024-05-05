@@ -7,7 +7,6 @@ import (
 
 	"github.com/lemmyMwaura/cli-test/account"
 	"github.com/lemmyMwaura/cli-test/pkg/reader"
-	"github.com/lemmyMwaura/cli-test/pkg/validators"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +28,7 @@ func init() {
 }
 
 func preCheckOption(cmd *cobra.Command, args []string) {
-	isSelected := validators.ValidateSelectedOption(SelectedOption)
+	isSelected := validateSelectedOption(SelectedOption)
 
 	if isSelected {
 		option, _ := cmd.Flags().GetString("option")
@@ -57,7 +56,7 @@ func promptUser() {
 	text, err := r.ReadUserInput("Enter the number of your choice: ")
 
 	if err != nil {
-		return
+		log.Fatal("", err)
 	}
 
 	index, err := strconv.Atoi(text)
@@ -81,4 +80,17 @@ func readOption(cmd *cobra.Command, args []string) {
 	default:
 		fmt.Println("Invalid option selected")
 	}
+}
+
+func validateSelectedOption(selectedOptn string) bool {
+	if selectedOptn != "" {
+		switch selectedOptn {
+		case "1", "2":
+			return true
+		default:
+			return false
+		}
+	}
+
+	return false
 }
