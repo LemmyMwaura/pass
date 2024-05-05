@@ -1,4 +1,4 @@
-module github.com/lemmyMwaura/cli-test
+module github.com/lemmyMwaura/pass
 
 go 1.22.2
 

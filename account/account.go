@@ -3,7 +3,7 @@ package account
 import (
 	"fmt"
 
-	"github.com/lemmyMwaura/cli-test/pkg/reader"
+	"github.com/lemmyMwaura/pass/pkg/reader"
 	"golang.org/x/crypto/bcrypt"
 )
 

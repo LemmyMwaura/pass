@@ -5,8 +5,8 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/lemmyMwaura/cli-test/account"
-	"github.com/lemmyMwaura/cli-test/pkg/reader"
+	"github.com/lemmyMwaura/pass/account"
+	"github.com/lemmyMwaura/pass/pkg/reader"
 	"github.com/spf13/cobra"
 )
 
