@@ -9,10 +9,10 @@ import (
 
 type Account struct {
 	username string
-	password string
+	password []byte
 }
 
-func NewAccount(uName, pass string) *Account {
+func NewAccount(uName string, pass []byte) *Account {
 	return &Account{
 		username: uName,
 		password: pass,
@@ -29,10 +29,18 @@ func CreateAccount() {
 	if password != cpassword {
 		fmt.Println("Passwords don't match.")
 		CreateAccount()
-	} else {
-		account := NewAccount(username, password)
-		fmt.Println(account)
+		return
 	}
+
+	hashedPassword, err := hashPassword(password)
+
+	if err != nil {
+		fmt.Printf("something went wrong: %s\n", err)
+		return
+	}
+
+	account := NewAccount(username, hashedPassword)
+	fmt.Println(account)
 }
 
 func Login() {
