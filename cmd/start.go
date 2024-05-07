@@ -73,7 +73,7 @@ func promptUser() {
 func readOption(cmd *cobra.Command, args []string) {
 	switch SelectedOption {
 	case "login":
-		fmt.Println("\nLogin selected")
+		account.Login()
 	case "create Account":
 		fmt.Println("\nCreate account selected")
 		account.CreateAccount()
@@ -83,14 +83,10 @@ func readOption(cmd *cobra.Command, args []string) {
 }
 
 func validateSelectedOption(selectedOptn string) bool {
-	if selectedOptn != "" {
-		switch selectedOptn {
-		case "1", "2":
-			return true
-		default:
-			return false
-		}
+	switch selectedOptn {
+	case "1", "2":
+		return true
+	default:
+		return false
 	}
-
-	return false
 }
