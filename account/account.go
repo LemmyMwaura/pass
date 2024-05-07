@@ -4,14 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/lemmyMwaura/pass/pkg/keychain"
 	"github.com/lemmyMwaura/pass/pkg/reader"
-	"github.com/zalando/go-keyring"
 	"golang.org/x/crypto/bcrypt"
-)
-
-const (
-	keyringService = "MyPasswordManager"
-	passwordPrefix = "PASSMANAGER:"
 )
 
 type Account struct {
@@ -24,24 +19,6 @@ func NewAccount(uName string, pass []byte) *Account {
 		username: uName,
 		password: pass,
 	}
-}
-
-// SaveToKeychain saves the account password to the system's keychain.
-func (acc *Account) SaveToKeychain() error {
-	return keyring.Set(keyringService, passwordPrefix+acc.username, string(acc.password))
-}
-
-// LoadFromKeychain loads the account password from the system's keychain.
-func (acc *Account) LoadFromKeychain() (string, error) {
-	password, err := keyring.Get(keyringService, passwordPrefix+acc.username)
-
-	if err == keyring.ErrNotFound {
-		return password, nil
-	} else if err != nil {
-		return "", err
-	}
-
-	return password, nil
 }
 
 func CreateAccount() {
@@ -66,14 +43,14 @@ func CreateAccount() {
 
 	account := NewAccount(username, hashedPassword)
 
-	password, err := account.LoadFromKeychain()
+	password, err := keychain.LoadFromKeychain(account.username)
 	if err != nil {
 		fmt.Printf("something went wrong: %s\n", err)
 		return
 	}
 
 	if password == "" {
-		account.SaveToKeychain()
+		keychain.SaveToKeychain(account.username, string(account.password))
 	} else {
 		fmt.Println("Account already exists, ...Login in instead")
 		Login()
@@ -90,6 +67,17 @@ func Login() {
 
 	if err != nil {
 		fmt.Printf("something went wrong: %s\n", err)
+		return
+	}
+
+	hashedPassword, err := keychain.LoadFromKeychain(password)
+	if err != nil {
+		fmt.Printf("something went wrong: %s\n", err)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
 		return
 	}
 
