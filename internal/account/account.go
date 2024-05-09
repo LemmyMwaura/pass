@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lemmyMwaura/pass/pkg/keychain"
-	"github.com/lemmyMwaura/pass/pkg/reader"
+	"github.com/lemmyMwaura/pass/internal/keychain"
+	"github.com/lemmyMwaura/pass/internal/reader"
 	"golang.org/x/crypto/bcrypt"
 )
 

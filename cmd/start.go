@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/lemmyMwaura/pass/account"
-	"github.com/lemmyMwaura/pass/pkg/reader"
+	"github.com/lemmyMwaura/pass/internal/account"
+	"github.com/lemmyMwaura/pass/internal/reader"
 	"github.com/spf13/cobra"
 )
 
