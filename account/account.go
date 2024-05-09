@@ -78,6 +78,7 @@ func Login() {
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
+		fmt.Println("Wrong password")
 		return
 	}
 

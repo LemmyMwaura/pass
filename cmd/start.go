@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	"github.com/lemmyMwaura/pass/account"
@@ -19,7 +20,7 @@ var startCmd = &cobra.Command{
 
 var (
 	SelectedOption string
-	options        = []string{"create Account", "login"}
+	options        = []string{"create Account", "login", "exit"}
 )
 
 func init() {
@@ -73,10 +74,14 @@ func promptUser() {
 func readOption(cmd *cobra.Command, args []string) {
 	switch SelectedOption {
 	case "login":
+		fmt.Println("\nLogin selected")
 		account.Login()
 	case "create Account":
 		fmt.Println("\nCreate account selected")
 		account.CreateAccount()
+	case "exit":
+		fmt.Println("\nExiting.")
+		os.Exit(0)
 	default:
 		fmt.Println("Invalid option selected")
 	}
