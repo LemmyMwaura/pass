@@ -1,6 +1,8 @@
 package keychain
 
 import (
+	"errors"
+
 	"github.com/zalando/go-keyring"
 )
 
@@ -16,7 +18,7 @@ func SaveToKeychain(username, password string) error {
 func LoadFromKeychain(username string) (string, error) {
 	password, err := keyring.Get(keyringService, passwordPrefix+username)
 
-	if err == keyring.ErrNotFound {
+	if errors.Is(err, keyring.ErrNotFound) {
 		return password, nil
 	} else if err != nil {
 		return "", err
