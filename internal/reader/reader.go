@@ -5,30 +5,43 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"syscall"
+
+	"golang.org/x/term"
 )
 
-// reader from stdIn
+// InputReader reads prompts from stdin.
 type InputReader struct {
 	reader *bufio.Reader
 }
 
 func NewInputReader() *InputReader {
-	r := bufio.NewReader(os.Stdin)
-
 	return &InputReader{
-		reader: r,
+		reader: bufio.NewReader(os.Stdin),
 	}
 }
 
-// ReadUserInput reads input from the user with the provided prompt and returns it.
+// ReadUserInput reads a line of visible text from the user.
 func (r *InputReader) ReadUserInput(prompt string) (string, error) {
 	fmt.Print(prompt)
 
 	text, err := r.reader.ReadString('\n')
-
 	if err != nil {
 		return "", err
 	}
 
 	return strings.TrimSpace(text), nil
+}
+
+// ReadPassword reads a line without echoing it to the terminal.
+func (r *InputReader) ReadPassword(prompt string) (string, error) {
+	fmt.Print(prompt)
+
+	bytes, err := term.ReadPassword(int(syscall.Stdin))
+	fmt.Println()
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(string(bytes)), nil
 }

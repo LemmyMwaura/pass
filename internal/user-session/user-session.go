@@ -1,17 +1,19 @@
 package usersession
 
-type UserSession struct {
-	Username string
+import "github.com/lemmyMwaura/pass/internal/vault"
 
-	Passwords []struct {
-		platform string
-		password string
-	}
+// UserSession holds an unlocked vault for the interactive session.
+type UserSession struct {
+	Vault *vault.Vault
 }
 
-func NewUserSession(username string, passwords []struct{ platform, password string }) *UserSession {
-	return &UserSession{
-		Username:  username,
-		Passwords: passwords,
+func NewUserSession(v *vault.Vault) *UserSession {
+	return &UserSession{Vault: v}
+}
+
+func (s *UserSession) Close() {
+	if s.Vault != nil {
+		s.Vault.Lock()
+		s.Vault = nil
 	}
 }

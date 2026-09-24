@@ -4,98 +4,75 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lemmyMwaura/pass/internal/keychain"
 	"github.com/lemmyMwaura/pass/internal/reader"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/lemmyMwaura/pass/internal/vault"
 )
 
-type Account struct {
-	username string
-	password []byte
-}
-
-func NewAccount(uName string, pass []byte) *Account {
-	return &Account{
-		username: uName,
-		password: pass,
-	}
-}
-
-func CreateAccount() {
+// CreateAccount prompts for credentials and creates an encrypted vault.
+func CreateAccount() (*vault.Vault, error) {
 	r := reader.NewInputReader()
 
-	username, _ := r.ReadUserInput("Enter your username:")
-	mpassword, _ := r.ReadUserInput("Enter your MainPassword:")
-	cpassword, _ := r.ReadUserInput("Confirm your MainPassword:")
-
-	if mpassword != cpassword {
-		fmt.Println("Passwords don't match.")
-		CreateAccount()
-		return
+	username, err := r.ReadUserInput("Enter your username: ")
+	if err != nil {
+		return nil, err
+	}
+	if username == "" {
+		return nil, errors.New("username cannot be empty")
 	}
 
-	hashedPassword, err := hashPassword(mpassword)
-
+	password, err := r.ReadPassword("Enter your master password: ")
 	if err != nil {
-		fmt.Printf("something went wrong: %s\n", err)
-		return
+		return nil, err
 	}
-
-	account := NewAccount(username, hashedPassword)
-
-	password, err := keychain.LoadFromKeychain(account.username)
+	confirm, err := r.ReadPassword("Confirm your master password: ")
 	if err != nil {
-		fmt.Printf("something went wrong: %s\n", err)
-		return
+		return nil, err
 	}
 
 	if password == "" {
-		keychain.SaveToKeychain(account.username, string(account.password))
-	} else {
-		fmt.Println("Account already exists, ...Login in instead")
-		Login()
+		return nil, errors.New("master password cannot be empty")
 	}
+	if password != confirm {
+		return nil, errors.New("passwords don't match")
+	}
+
+	v, err := vault.Create(username, password)
+	if err != nil {
+		if errors.Is(err, vault.ErrAlreadyExists) {
+			return nil, fmt.Errorf("account %q already exists — login instead", username)
+		}
+		return nil, err
+	}
+
+	fmt.Printf("Account %q created. Vault stored at ~/.pass/\n", username)
+	return v, nil
 }
 
-func Login() {
+// Login unlocks an existing vault with the master password.
+func Login() (*vault.Vault, error) {
 	r := reader.NewInputReader()
 
-	username, err1 := r.ReadUserInput("Enter your username:")
-	password, err2 := r.ReadUserInput("Enter your password:")
-
-	err := errors.Join(err1, err2)
-
+	username, err := r.ReadUserInput("Enter your username: ")
 	if err != nil {
-		fmt.Printf("something went wrong: %s\n", err)
-		return
+		return nil, err
 	}
-
-	hashedPassword, err := keychain.LoadFromKeychain(password)
-	if err != nil {
-		fmt.Printf("something went wrong: %s\n", err)
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err != nil {
-		fmt.Println("Wrong password")
-		return
-	}
-
-	fmt.Println(username, password)
-}
-
-func hashPassword(password string) ([]byte, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
+	password, err := r.ReadPassword("Enter your master password: ")
 	if err != nil {
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+	v, err := vault.Unlock(username, password)
 	if err != nil {
-		return nil, err
+		switch {
+		case errors.Is(err, vault.ErrNoVault):
+			return nil, fmt.Errorf("no account found for %q — create one first", username)
+		case errors.Is(err, vault.ErrWrongPassword):
+			return nil, errors.New("wrong password")
+		default:
+			return nil, err
+		}
 	}
 
-	return hashedPassword, nil
+	fmt.Printf("Unlocked vault for %q\n", username)
+	return v, nil
 }
