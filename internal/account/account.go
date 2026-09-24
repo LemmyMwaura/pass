@@ -4,31 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lemmyMwaura/pass/internal/reader"
 	"github.com/lemmyMwaura/pass/internal/vault"
 )
 
-// CreateAccount prompts for credentials and creates an encrypted vault.
-func CreateAccount() (*vault.Vault, error) {
-	r := reader.NewInputReader()
-
-	username, err := r.ReadUserInput("Enter your username: ")
-	if err != nil {
-		return nil, err
-	}
+// Create builds a new encrypted vault for username.
+func Create(username, password, confirm string) (*vault.Vault, error) {
 	if username == "" {
 		return nil, errors.New("username cannot be empty")
 	}
-
-	password, err := r.ReadPassword("Enter your master password: ")
-	if err != nil {
-		return nil, err
-	}
-	confirm, err := r.ReadPassword("Confirm your master password: ")
-	if err != nil {
-		return nil, err
-	}
-
 	if password == "" {
 		return nil, errors.New("master password cannot be empty")
 	}
@@ -43,22 +26,16 @@ func CreateAccount() (*vault.Vault, error) {
 		}
 		return nil, err
 	}
-
-	fmt.Printf("Account %q created. Vault stored at ~/.pass/\n", username)
 	return v, nil
 }
 
 // Login unlocks an existing vault with the master password.
-func Login() (*vault.Vault, error) {
-	r := reader.NewInputReader()
-
-	username, err := r.ReadUserInput("Enter your username: ")
-	if err != nil {
-		return nil, err
+func Login(username, password string) (*vault.Vault, error) {
+	if username == "" {
+		return nil, errors.New("username cannot be empty")
 	}
-	password, err := r.ReadPassword("Enter your master password: ")
-	if err != nil {
-		return nil, err
+	if password == "" {
+		return nil, errors.New("master password cannot be empty")
 	}
 
 	v, err := vault.Unlock(username, password)
@@ -72,7 +49,5 @@ func Login() (*vault.Vault, error) {
 			return nil, err
 		}
 	}
-
-	fmt.Printf("Unlocked vault for %q\n", username)
 	return v, nil
 }

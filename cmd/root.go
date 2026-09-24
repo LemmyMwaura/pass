@@ -11,7 +11,7 @@ var rootCmd = &cobra.Command{
 	Short: "A simple encrypted CLI password manager",
 	Long: `pass stores credentials in an encrypted vault under ~/.pass/.
 
-Use "pass start" for the interactive vault, or "pass generate" to create a password.`,
+Use "pass start" for the Bubble Tea TUI, or "pass generate" to create a password.`,
 }
 
 func Execute() {
